@@ -1,0 +1,32 @@
+name: Deploy Remote Team Tracker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Deploy to Server
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          echo "Deploying application..."
+          ssh -o StrictHostKeyChecking=no user@server 'cd /var/www/app && git pull && npm install && pm2 restart app'
